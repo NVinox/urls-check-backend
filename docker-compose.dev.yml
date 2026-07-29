@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  database:
+    image: postgres:15-alpine
+    env_file:
+      - .env.development.local
+    container_name: urls-check-database
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    ports:
+      - '${POSTGRES_PORT}:${POSTGRES_PORT}'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  api:
+    build:
+      context: .
+      target: development
+    env_file:
+      - .env.development.local
+    container_name: urls-check-api
+    depends_on:
+      - database
+    ports:
+      - '${APPLICATION_PORT}:${APPLICATION_PORT}'
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@database:${POSTGRES_PORT}/${POSTGRES_DB}
+      - NODE_ENV=development
+
+volumes:
+  postgres_data:
+
+networks:
+  default:
+    name: urls-check-network
+    external: true
