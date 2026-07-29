@@ -3,6 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { getDatabaseConfig } from './config/database.config';
+import { JobModule } from './job/job.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { getDatabaseConfig } from './config/database.config';
       useFactory: getDatabaseConfig,
       inject: [ConfigService],
     }),
+    JobModule,
   ],
   controllers: [],
   providers: [],
