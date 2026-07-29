@@ -2,10 +2,12 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
 import { EJobStatus } from 'src/enums/EJobStatus.enum';
+import { UrlEntity } from 'src/url/entities/url.entity';
 
 @Entity({ name: 'jobs' })
 export class JobEntity {
@@ -29,4 +31,7 @@ export class JobEntity {
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt!: Date;
+
+  @OneToMany(() => UrlEntity, (url) => url.job, { cascade: true })
+  urls!: UrlEntity[];
 }
