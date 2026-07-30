@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -77,6 +78,30 @@ export class JobService {
     }
 
     return await this.urlService.getUrlsByJob(uuid);
+  }
+
+  async delete(uuid: string): Promise<boolean> {
+    const job = await this.jobRepository.findOneBy({ jobId: uuid });
+
+    if (!job) {
+      throw new NotFoundException(`Job with uuid=${uuid}`);
+    }
+
+    if (
+      job.status !== EJobStatus.IN_PROGRESS ||
+      job.status !== EJobStatus.IN_PROGRESS
+    ) {
+      throw new BadRequestException(`Job with uuid=${uuid} completed`);
+    }
+
+    const controller = this.activeJobs.get(uuid);
+
+    if (controller) {
+      controller.abort();
+      this.activeJobs.delete(uuid);
+    }
+
+    return true;
   }
 
   private async runJob(

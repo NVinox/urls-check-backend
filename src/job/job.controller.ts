@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 
 import { JobService } from './job.service';
@@ -37,5 +37,10 @@ export class JobController {
     return plainToInstance(ResponseUrlDTO, urls, {
       excludeExtraneousValues: true,
     });
+  }
+
+  @Delete(':uuid')
+  async delete(@Param('uuid') uuid: string): Promise<boolean> {
+    return await this.jobService.delete(uuid);
   }
 }
