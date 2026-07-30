@@ -64,7 +64,7 @@ export class JobService {
 
   async getAll(): Promise<JobEntity[]> {
     try {
-      return await this.jobRepository.find();
+      return await this.jobRepository.find({ order: { id: 'DESC' } });
     } catch (err: unknown) {
       throw new InternalServerErrorException();
     }
