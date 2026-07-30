@@ -1,11 +1,9 @@
 import { Expose } from 'class-transformer';
+import { ResponseCreatedJobDTO } from './response-created-job.dto';
 
-export class ResponseJobDTO {
+export class ResponseJobDTO extends ResponseCreatedJobDTO {
   @Expose()
   id!: number;
-
-  @Expose()
-  jobId!: string;
 
   @Expose()
   status!: string;
