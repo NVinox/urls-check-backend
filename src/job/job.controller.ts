@@ -6,7 +6,7 @@ import { JobService } from './job.service';
 import { ResponseJobDTO } from './dto/response-job.dto';
 import { ResponseCreatedJobDTO } from './dto/response-created-job.dto';
 import { CreateJobDTO } from './dto/create-job.dto';
-import { ResponseUrlDTO } from 'src/url/dto/response-url.dto';
+import { ResponseJobOneDTO } from './dto/response-job-one';
 
 @Controller('jobs')
 export class JobController {
@@ -31,10 +31,10 @@ export class JobController {
   }
 
   @Get(':uuid')
-  async getUrlsByJob(@Param('uuid') uuid: string): Promise<ResponseUrlDTO[]> {
-    const urls = await this.jobService.getUrlsByJob(uuid);
+  async getJob(@Param('uuid') uuid: string): Promise<ResponseJobOneDTO> {
+    const job = await this.jobService.getJob(uuid);
 
-    return plainToInstance(ResponseUrlDTO, urls, {
+    return plainToInstance(ResponseJobOneDTO, job, {
       excludeExtraneousValues: true,
     });
   }
