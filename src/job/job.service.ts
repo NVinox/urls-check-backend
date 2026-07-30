@@ -70,14 +70,22 @@ export class JobService {
     }
   }
 
-  async getUrlsByJob(uuid: string): Promise<UrlEntity[]> {
-    const isExistJob = await this.jobRepository.existsBy({ jobId: uuid });
+  async getJob(uuid: string): Promise<JobEntity> {
+    const job = await this.jobRepository.findOne({
+      where: { jobId: uuid },
+      relations: { urls: true },
+      order: {
+        urls: {
+          id: 'ASC',
+        },
+      },
+    });
 
-    if (!isExistJob) {
+    if (!job) {
       throw new NotFoundException(`Job with uuid=${uuid}`);
     }
 
-    return await this.urlService.getUrlsByJob(uuid);
+    return job;
   }
 
   async delete(uuid: string): Promise<boolean> {
