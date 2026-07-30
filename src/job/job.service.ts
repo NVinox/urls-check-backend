@@ -1,4 +1,8 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { v4 as uuidv4 } from 'uuid';
@@ -63,6 +67,16 @@ export class JobService {
     } catch (err: unknown) {
       throw new InternalServerErrorException();
     }
+  }
+
+  async getUrlsByJob(uuid: string): Promise<UrlEntity[]> {
+    const isExistJob = await this.jobRepository.existsBy({ jobId: uuid });
+
+    if (!isExistJob) {
+      throw new NotFoundException(`Job with uuid=${uuid}`);
+    }
+
+    return await this.urlService.getUrlsByJob(uuid);
   }
 
   private async runJob(

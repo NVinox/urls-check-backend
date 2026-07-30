@@ -20,6 +20,12 @@ export class UrlService {
     return manager.create(UrlEntity, { url, job });
   }
 
+  async getUrlsByJob(jobUuid: string): Promise<UrlEntity[]> {
+    return await this.urlRepository.find({
+      where: { job: { jobId: jobUuid } },
+    });
+  }
+
   async saveMany(
     urls: UrlEntity[],
     manager: EntityManager,

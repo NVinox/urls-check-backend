@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 
 import { JobService } from './job.service';
@@ -6,6 +6,7 @@ import { JobService } from './job.service';
 import { ResponseJobDTO } from './dto/response-job.dto';
 import { ResponseCreatedJobDTO } from './dto/response-created-job.dto';
 import { CreateJobDTO } from './dto/create-job.dto';
+import { ResponseUrlDTO } from 'src/url/dto/response-url.dto';
 
 @Controller('jobs')
 export class JobController {
@@ -25,6 +26,15 @@ export class JobController {
     const jobs = await this.jobService.getAll();
 
     return plainToInstance(ResponseJobDTO, jobs, {
+      excludeExtraneousValues: true,
+    });
+  }
+
+  @Get(':uuid')
+  async getUrlsByJob(@Param('uuid') uuid: string): Promise<ResponseUrlDTO[]> {
+    const urls = await this.jobService.getUrlsByJob(uuid);
+
+    return plainToInstance(ResponseUrlDTO, urls, {
       excludeExtraneousValues: true,
     });
   }
