@@ -64,7 +64,7 @@ export class JobService {
 
   async getAll(): Promise<JobEntity[]> {
     try {
-      return await this.jobRepository.find();
+      return await this.jobRepository.find({ order: { id: 'DESC' } });
     } catch (err: unknown) {
       throw new InternalServerErrorException();
     }
@@ -129,26 +129,30 @@ export class JobService {
     );
 
     if (signal.aborted) {
-      await this.jobRepository.update(
-        { jobId },
-        { status: EJobStatus.CANCALED },
-      );
+      await this.updateJobStates(jobId, EJobStatus.CANCALED);
       this.activeJobs.delete(jobId);
       return;
     }
 
+    await this.updateJobStates(jobId);
+
+    this.activeJobs.delete(jobId);
+  }
+
+  private async updateJobStates(
+    uuid: string,
+    status = EJobStatus.COMPLETED,
+  ): Promise<void> {
     const { successCount, errorCount } =
-      await this.urlService.getUrlsStatusByJob(jobId);
+      await this.urlService.getUrlsStatusByJob(uuid);
 
     await this.jobRepository.update(
-      { jobId },
+      { jobId: uuid },
       {
-        status: EJobStatus.COMPLETED,
+        status,
         successCount,
         errorCount,
       },
     );
-
-    this.activeJobs.delete(jobId);
   }
 }
