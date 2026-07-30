@@ -2,6 +2,9 @@ import { Expose } from 'class-transformer';
 
 export class ResponseUrlDTO {
   @Expose()
+  id!: number;
+
+  @Expose()
   url!: string;
 
   @Expose()
