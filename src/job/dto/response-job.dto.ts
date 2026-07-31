@@ -16,4 +16,7 @@ export class ResponseJobDTO extends ResponseCreatedJobDTO {
 
   @Expose()
   errorCount!: number;
+
+  @Expose()
+  createdAt!: Date;
 }
