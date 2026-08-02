@@ -19,7 +19,6 @@ import { UrlEntity } from 'src/url/entities/url.entity';
 
 @Injectable()
 export class JobService {
-  // private activeJobs = new Map<string, AbortController>();
   private activeJobs = new Map<
     string,
     {
