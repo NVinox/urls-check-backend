@@ -19,6 +19,11 @@ async function bootstrap() {
       transform: true,
     }),
   );
+  app.enableCors({
+    origin: '*',
+    methods: 'GET, POST, DELETE',
+    credentials: true,
+  });
 
   await app.listen(process.env.APPLICATION_PORT ?? 3000);
 }

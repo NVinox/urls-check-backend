@@ -92,7 +92,7 @@ export class JobService {
     const job = await this.jobRepository.findOneBy({ jobId: uuid });
 
     if (!job) {
-      throw new NotFoundException(`Job with uuid=${uuid}`);
+      throw new NotFoundException(`Job with uuid=${uuid} not found`);
     }
 
     if (

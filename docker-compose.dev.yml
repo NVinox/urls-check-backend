@@ -14,6 +14,8 @@ services:
       - '${POSTGRES_PORT}:${POSTGRES_PORT}'
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - default
 
   api:
     build:
@@ -32,6 +34,8 @@ services:
     environment:
       - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@database:${POSTGRES_PORT}/${POSTGRES_DB}
       - NODE_ENV=development
+    networks:
+      - default
 
 volumes:
   postgres_data:
