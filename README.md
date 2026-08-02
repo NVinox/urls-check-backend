@@ -22,7 +22,11 @@ npm install
 docker network create urls-check-network
 ```
 
-4. Объявить переменные окружения (.env.development.local - для dev, .env.production.local - для prod)
+4. Объявить переменные окружения (**.env.development.local** - для dev, **.env.production.local** - для prod)
+
+```bash
+cp .env.example .env.development.local && cp .env.example .env.production.local
+```
 
 5. Собрать и запустить Docker
 
