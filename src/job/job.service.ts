@@ -19,7 +19,14 @@ import { UrlEntity } from 'src/url/entities/url.entity';
 
 @Injectable()
 export class JobService {
-  private activeJobs = new Map<string, AbortController>();
+  // private activeJobs = new Map<string, AbortController>();
+  private activeJobs = new Map<
+    string,
+    {
+      controller: AbortController;
+      donePromise: Promise<void>;
+    }
+  >();
 
   constructor(
     @InjectRepository(JobEntity)
@@ -50,7 +57,17 @@ export class JobService {
       });
 
       const abortController = new AbortController();
-      this.activeJobs.set(jobId, abortController);
+
+      const donePromise = this.runJob(
+        jobId,
+        savedUrlEntities,
+        abortController.signal,
+      );
+
+      this.activeJobs.set(jobId, {
+        controller: abortController,
+        donePromise,
+      });
 
       this.runJob(jobId, savedUrlEntities, abortController.signal);
 
@@ -95,18 +112,16 @@ export class JobService {
       throw new NotFoundException(`Job with uuid=${uuid} not found`);
     }
 
-    if (
-      job.status !== EJobStatus.IN_PROGRESS ||
-      job.status !== EJobStatus.IN_PROGRESS
-    ) {
+    if (job.status !== EJobStatus.IN_PROGRESS) {
       throw new BadRequestException(`Job with uuid=${uuid} completed`);
     }
 
-    const controller = this.activeJobs.get(uuid);
+    const activeJob = this.activeJobs.get(uuid);
 
-    if (controller) {
-      controller.abort();
-      this.activeJobs.delete(uuid);
+    if (activeJob) {
+      activeJob.controller.abort();
+
+      await activeJob.donePromise;
     }
 
     return true;
@@ -117,26 +132,34 @@ export class JobService {
     urlEntities: UrlEntity[],
     signal: AbortSignal,
   ): Promise<void> {
-    await this.jobRepository.update(
-      { jobId },
-      { status: EJobStatus.IN_PROGRESS },
-    );
+    try {
+      await this.jobRepository.update(
+        { jobId },
+        { status: EJobStatus.IN_PROGRESS },
+      );
 
-    await Promise.all(
-      urlEntities.map((urlEntity) =>
-        this.urlService.checkUrl(urlEntity, signal),
-      ),
-    );
+      if (signal.aborted) {
+        await this.updateJobStates(jobId, EJobStatus.CANCELLED);
+        return;
+      }
 
-    if (signal.aborted) {
-      await this.updateJobStates(jobId, EJobStatus.CANCALED);
+      await Promise.all(
+        urlEntities.map((urlEntity) =>
+          this.urlService.checkUrl(urlEntity, signal),
+        ),
+      );
+
+      if (signal.aborted) {
+        await this.updateJobStates(jobId, EJobStatus.CANCELLED);
+        return;
+      }
+
+      await this.updateJobStates(jobId);
+    } catch (error) {
+      await this.updateJobStates(jobId, EJobStatus.CANCELLED);
+    } finally {
       this.activeJobs.delete(jobId);
-      return;
     }
-
-    await this.updateJobStates(jobId);
-
-    this.activeJobs.delete(jobId);
   }
 
   private async updateJobStates(
